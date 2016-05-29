@@ -23,7 +23,7 @@ namespace MeasurementCollectorIOT.Views
 		{
 			if (e.Key == VirtualKey.Enter)
 			{
-				ViewModel.AcceptMeasurementEntry.Execute(txtDataEntry.Text);
+				ViewModel.AcceptMeasurementEntryCommand.Execute(txtDataEntry.Text);
 				txtDataEntry.Text = string.Empty;
 			}
 		}

@@ -2,6 +2,7 @@
 	x:Class="MeasurementCollectorIOT.Views.MainPage"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:io="using:Windows.Storage"
 	xmlns:interactivity="using:Microsoft.Xaml.Interactivity"  
 	xmlns:core="using:Microsoft.Xaml.Interactions.Core"  
 	xmlns:storage="using:Windows.Storage"
@@ -23,6 +24,13 @@
 		</DataTemplate>
 		<helpers:SelectionChangeConverter x:Key="SelectionChangeConverter"/>
 	</Page.Resources>
+	<Page.TopAppBar>
+		<CommandBar>
+			<AppBarButton Icon="SelectAll" Label="Select All"/>
+			<AppBarButton Icon="Save" Label="Save" Command="{Binding ExportToCsvCommand}"/>
+			<AppBarButton Icon="Delete" Label="Delete" Command="{Binding DeleteFilesCommand}"/>
+		</CommandBar>
+	</Page.TopAppBar>
 	<Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="2*"/>
@@ -30,24 +38,30 @@
 		</Grid.ColumnDefinitions>
 		<StackPanel>
 			<TextBox Header="Data Entry" x:Name="txtDataEntry" Text="{Binding Measurement, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" InputScope="Digits" KeyDown="txtDataEntry_KeyDown"/>
-			<ListView x:Name="lstMeasurements" Header="Entries" ItemTemplate="{StaticResource DeviceMeasurementTemplate}" ItemsSource="{Binding MeasurementsTaken}" />
+			<ListView x:Name="lstMeasurements" Header="Entries" 
+					  ItemTemplate="{StaticResource DeviceMeasurementTemplate}" 
+					  ItemsSource="{Binding MeasurementsTaken}" />
 		</StackPanel>
-		<Grid Grid.Column="2">
+		<Grid Grid.Column="1" Margin="1.5,0,-1.375,0">
 			<Grid.RowDefinitions>
 				<RowDefinition Height="Auto"/>
 				<RowDefinition Height="*"/>
 			</Grid.RowDefinitions>
-			<ListView x:Name="StorageFileList" Header="Files" SelectionMode="Multiple" ItemsSource="{Binding Files}" DisplayMemberPath="{Binding DisplayName}">
+			<ListView x:Name="StorageFileList" Header="Files" 
+					  ItemsSource="{Binding Files}"
+					  DisplayMemberPath="{x:Bind Name}"
+					  SelectionMode="Multiple">
+				<ListView.ItemTemplate>
+					<DataTemplate x:DataType="io:StorageFile">
+						<TextBlock Text="{x:Bind Name}"/>
+					</DataTemplate>
+				</ListView.ItemTemplate>
 				<interactivity:Interaction.Behaviors>
-					<core:EventTriggerBehavior>
-						<core:InvokeCommandAction Command="{Binding ExportEntriesToCsvCommand}" InputConverter="{StaticResource SelectionChangeConverter}" InputConverterParameter="{Binding ElementName=StorageFileList}"/>
+					<core:EventTriggerBehavior EventName="SelectionChanged">
+						<core:InvokeCommandAction Command="{Binding UpdateSelectedFileListCommand}" InputConverter="{StaticResource SelectionChangeConverter}" InputConverterParameter="{Binding ElementName=StorageFileList}"/>
 					</core:EventTriggerBehavior>
 				</interactivity:Interaction.Behaviors>
-				</ListView>
-			<StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Bottom">
-				<Button x:Name="exportButton" Content="Export" Command="{Binding ExportToCsvCommand}"/>
-				<Button x:Name="deleteButton" Content="Delete" />
-			</StackPanel>
+			</ListView>
 		</Grid>
 	</Grid>
 </Page>
